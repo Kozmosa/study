@@ -23,7 +23,6 @@ function findSync(startPath) {
     finder(startPath);
     return result;
 }
-let fileNames=findSync('./');
 
 function getFileContent(fname) {
     // Get File Content by Fs module
@@ -31,9 +30,9 @@ function getFileContent(fname) {
     return content;
 }
 
-function getHtmlCode(fname) {
+function getHtmlCode(fPath, fName) {
     // Get Href Code
-    let code = '<a href=' + fname + ' >' + fname + '</a>';
+    let code = '<a href=' + fPath + ' >' + fName + '</a>';
     return code;
 }
 
@@ -47,7 +46,7 @@ function startHttpServer(body) {
     let foot = fs.readFileSync('./server/front/foot.html');
     let html = head + body + foot;
     // Start HTTP Server by Http Module
-    http.createServer(function (request, response) {
+    let server = http.createServer(function (request, response) {
         // Send Http Header
         // 200 OK
         // Content type: text/html
@@ -61,7 +60,26 @@ function startHttpServer(body) {
     console.log('Server start at 127.0.0.1:8888');
 }
 
-function main() {}
+function main() {
+    // Main Function
 
-// Output Test Infomation
-startHttpServer();
+    // Scan Files in ./file/ directory
+    let fileNames = findSync('./file/');
+    let codes = [];
+    for(var i = 0;i<fileNames.length;i++){
+        // Get HTML Code
+        codes[i] = getHtmlCode('./file/' + fileNames[i], fileNames[i]);
+    }
+
+    let body = '';
+    for(let i = 0;i<codes.length;i++){
+        // Add HTML Code
+        body = body + codes[i];
+    }
+
+    // Start HTTP Service
+    startHttpServer(body);
+}
+
+// Start Function
+main();
