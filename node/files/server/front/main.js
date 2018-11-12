@@ -1,0 +1,3 @@
+function getViewCode(fname) {
+    var //
+}
