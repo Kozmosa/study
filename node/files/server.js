@@ -1,7 +1,8 @@
-let fs = require('fs');
-let join = require('path').join;
-let http = require('http');
-let url = require('url');
+const fs = require('fs');
+const join = require('path').join;
+const http = require('http');
+const url = require('url');
+const express = require('express');
 
 /**
  * 
@@ -9,14 +10,15 @@ let url = require('url');
  * @returns {Array}
  */
 function findSync(startPath) {
-    let result=[];
+    let result = [];
+
     function finder(path) {
-        let files=fs.readdirSync(path);
-        files.forEach((val,index) => {
-            let fPath=join(path,val);
-            let stats=fs.statSync(fPath);
-            if(stats.isDirectory()) finder(fPath);
-            if(stats.isFile()) result.push(fPath);
+        let files = fs.readdirSync(path);
+        files.forEach((val, index) => {
+            let fPath = join(path, val);
+            let stats = fs.statSync(fPath);
+            if (stats.isDirectory()) finder(fPath);
+            if (stats.isFile()) result.push(fPath);
         });
 
     }
@@ -26,7 +28,7 @@ function findSync(startPath) {
 
 function getFileContent(fname) {
     // Get File Content by Fs module
-    let content = fs.readFileSync(fname, 'utf-8',);
+    let content = fs.readFileSync(fname, 'utf-8', );
     return content;
 }
 
@@ -42,22 +44,78 @@ function writeCodeInHtml() {
 
 function startHttpServer(body) {
     // Get HTML Page Content
-    let head = fs.readFileSync('./server/front/head.html');
-    let foot = fs.readFileSync('./server/front/foot.html');
+    let webRootDir = './file';
+    let head = fs.readFileSync('./file/server/front/head.html');
+    let foot = fs.readFileSync('./file/server/front/foot.html');
     let html = head + body + foot;
+
     // Start HTTP Server by Http Module
     let server = http.createServer(function (request, response) {
+        // Get Request String
+        let reqUrl = request.url;
+
         // Send Http Header
         // 200 OK
         // Content type: text/html
-        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.writeHead(200, {
+            'Content-Type': 'text/html'
+        });
 
         // Send Response Data
-        response.write(html);
+        if (reqUrl == '/index.html') {
+            response.write(html);
+        } else {
+            response.write(fs.readFileSync(webRootDir + reqUrl, 'utf-8'));
+        }
         // Test Response
         response.end();
     }).listen(8888);
     console.log('Server start at 127.0.0.1:8888');
+}
+
+function startFileServer(body) {
+    // Get HTML Page Content
+    let webRootDir = './file';
+    let head = fs.readFileSync('./file/server/front/head.html');
+    let foot = fs.readFileSync('./file/server/front/foot.html');
+    let html = head + body + foot;
+
+    // Start HTTP Server by Http Module
+    let server = http.createServer(function (request, response) {
+        // Get Request String
+        let reqUrl = request.url;
+
+        // Send Http Header
+        // 200 OK
+        // Content type: text/html
+        response.writeHead(200, {
+            'Content-Type': 'text/html'
+        });
+
+        // Send Response Data
+        response.write(fs.readFileSync(webRootDir + reqUrl, 'utf-8'));
+        // Test Response
+        response.end();
+    }).listen(8888);
+    console.log('Server start at 127.0.0.1:8888');
+}
+
+function startExpressServer(port) {
+    // Start Express Server
+    let app = express();
+    app.get('/', function(req, res) {
+        //Console Log
+        console.log('Request index page');
+        let index = fs.readFileSync('./file/server/front/index.html');
+        res.send(index);
+    });
+
+    let server = app.listen(port, function() {
+        let addr = server.address().address;
+        let port = server.address().port;
+
+        console.log('Server start at ' + addr + ':' + port);
+    });
 }
 
 function main() {
@@ -66,13 +124,13 @@ function main() {
     // Scan Files in ./file/ directory
     let fileNames = findSync('./file/');
     let codes = [];
-    for(var i = 0;i<fileNames.length;i++){
+    for (var i = 0; i < fileNames.length; i++) {
         // Get HTML Code
         codes[i] = getHtmlCode('./file/' + fileNames[i], fileNames[i]);
     }
 
     let body = '';
-    for(let i = 0;i<codes.length;i++){
+    for (let i = 0; i < codes.length; i++) {
         // Add HTML Code
         body = body + codes[i];
     }
@@ -82,4 +140,4 @@ function main() {
 }
 
 // Start Function
-main();
+startExpressServer(8888);
