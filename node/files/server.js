@@ -107,7 +107,8 @@ function startExpressServer(port) {
         //Console Log
         console.log('Request index page');
         let index = fs.readFileSync('./file/server/front/index.html');
-        res.send(index);
+        res.type('text/html');
+        res.sendfile('./file/server/front/index.html');
     });
 
     let server = app.listen(port, function() {
@@ -139,5 +140,5 @@ function main() {
     startHttpServer(body);
 }
 
-// Start Function
-startExpressServer(8888);
+// Export Method
+exports.startExpressServer = startExpressServer();
