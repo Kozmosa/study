@@ -3,6 +3,9 @@ const join = require('path').join;
 const http = require('http');
 const url = require('url');
 const express = require('express');
+const mutipart = require('connect-multiparty');
+
+let mutipartMiddleware = mutipart();
 
 /**
  * 
@@ -100,7 +103,7 @@ function startFileServer(body) {
     console.log('Server start at 127.0.0.1:8888');
 }
 
-function startExpressServer(port) {
+function startDirectoryServer(port) {
     // Start Express Server
     let app = express();
     app.get('/', function(req, res) {
@@ -116,6 +119,35 @@ function startExpressServer(port) {
         let port = server.address().port;
 
         console.log('Server start at ' + addr + ':' + port);
+    });
+}
+
+function startUploadServer(port) {
+    let app = express();
+    app.use(mutipart({uploadDir:'./file/uploads'}));
+
+    // 设置http服务的监听端口号
+    app.set('port', port);
+    app.listen(app.get('port'), function () {
+        console.log('File Upload Server started on 127.0.0.1:' + app.get('port') );
+    });
+
+    // 浏览器访问的主页
+    app.get('/', function (req, res) {
+        //Output Connect Infomation
+        console.log('Request Index Page.');
+        res.type('text/html');
+        res.sendfile('file/server/front/upload.html');
+    });
+
+    // 开始写重要代码
+    // 接受form表单的请求接口，请求方法为post
+    app.post('/upload', mutipartMiddleware, function (req, res){
+        // 输出辅助信息
+        console.log('Receive File Success.');
+
+        // 返回成功提示给浏览器
+        res.send('upload success!');
     });
 }
 
@@ -140,5 +172,6 @@ function main() {
     startHttpServer(body);
 }
 
-// Export Method
-exports.startExpressServer = startExpressServer();
+// Main Activity
+console.log('Start Server......');
+startUploadServer(8888);
