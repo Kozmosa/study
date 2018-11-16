@@ -4,15 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <title>File upload</title>
+
+    <link href="./css/mdui.min.css" rel="stylesheet" />
 </head>
 
 <body>
-    <form action="/upload" enctype="multipart/form-data" method="post">
-        <p>附件：<input type="file" name="myfile" style=""></p>
-        <p>
-            <input type="submit">
-        </p>
-    </form>
+    <div class="mdui-container">
+        <h1 style="text-align: center;">
+            File Upload
+        </h1>
+        <div style="text-align: center;">
+            <form action="/upload" enctype="multipart/form-data" method="post">
+                <p>附件：<input class="mdui-color-teal" type="file" name="myfile" style=""></p>
+                <p>
+                    <input class="mdui-btn mdui-ripple mdui-color-teal" type="submit">
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="./js/mdui.min.js"></script>
 </body>
 
 </html>
